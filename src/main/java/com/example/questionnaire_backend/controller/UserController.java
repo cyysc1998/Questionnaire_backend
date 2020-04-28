@@ -2,18 +2,18 @@ package com.example.questionnaire_backend.controller;
 
 import com.example.questionnaire_backend.domain.User;
 import com.example.questionnaire_backend.repository.UserRepository;
+import com.example.questionnaire_backend.service.UserManage;
 import com.example.questionnaire_backend.service.impl.UserManageImpl;
 import net.minidev.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @RestController
 public class UserController {
+
     @Resource
-    private UserRepository userRepository;
-    private UserManageImpl userManage = new UserManageImpl();
+    private UserManage userManage;
 
     @CrossOrigin
     @ResponseBody
@@ -34,9 +34,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/api/register/emailcheck")
     public int registerEmailCheck(@RequestParam String email) {
-//        return userManage.registerEmailCheck(email);
-        List<User> email_duplicate_check = userRepository.findAllByEmail(email);
-        return email_duplicate_check.size()==0 ? 1:0;
+        return userManage.registerEmailCheck(email);
     }
 
     @CrossOrigin

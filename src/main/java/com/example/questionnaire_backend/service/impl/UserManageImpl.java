@@ -4,13 +4,18 @@ import com.example.questionnaire_backend.domain.User;
 import com.example.questionnaire_backend.repository.UserRepository;
 import com.example.questionnaire_backend.service.UserManage;
 import net.minidev.json.JSONObject;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
+@Service
+@Transactional
 public class UserManageImpl implements UserManage {
     @Resource
     private UserRepository userRepository;
+
 
     public int login(JSONObject user) {
         User query = userRepository.findByName(user.get("username").toString());
@@ -42,12 +47,9 @@ public class UserManageImpl implements UserManage {
     }
 
     public int registerNameCheck(String name) {
-        System.out.println(name);
         List<User> name_duplicate_check = null;
-        if(userRepository == null) System.out.println("zz");
         try {
             name_duplicate_check = userRepository.findAllByName(name);
-            
         }
         catch(Exception e) {
             e.printStackTrace();
