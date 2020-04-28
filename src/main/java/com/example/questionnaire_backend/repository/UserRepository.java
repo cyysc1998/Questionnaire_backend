@@ -1,5 +1,6 @@
-package com.example.questionnaire_backend.domain;
+package com.example.questionnaire_backend.repository;
 
+import com.example.questionnaire_backend.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
