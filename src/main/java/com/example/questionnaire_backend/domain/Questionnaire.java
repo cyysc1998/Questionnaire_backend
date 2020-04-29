@@ -13,6 +13,9 @@ public class Questionnaire {
     @Column(name = "title")
     private String title;
 
+    @Column(name = "introduction")
+    private String introduction;
+
     @Column(name = "begin_time")
     private Date beginTime;
 
@@ -46,6 +49,14 @@ public class Questionnaire {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getIntroduction() {
+        return introduction;
+    }
+
+    public void setIntroduction(String introduction) {
+        this.introduction = introduction;
     }
 
     public Date getBeginTime() {
