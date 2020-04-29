@@ -1,9 +1,6 @@
 package com.example.questionnaire_backend.controller;
 
-import com.example.questionnaire_backend.domain.User;
-import com.example.questionnaire_backend.repository.UserRepository;
 import com.example.questionnaire_backend.service.UserManage;
-import com.example.questionnaire_backend.service.impl.UserManageImpl;
 import net.minidev.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
