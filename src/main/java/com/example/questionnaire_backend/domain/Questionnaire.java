@@ -2,6 +2,7 @@ package com.example.questionnaire_backend.domain;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Questionnaire")
@@ -17,19 +18,22 @@ public class Questionnaire {
     private String introduction;
 
     @Column(name = "begin_time")
-    private Date beginTime;
+    private LocalDate beginTime;
 
     @Column(name = "end_time")
-    private Date endTime;
+    private LocalDate endTime;
 
     @Column(name = "need_register")
-    private int needRegister;
+    private Boolean needRegister;
 
     @Column(name = "times_per_day")
-    private int timesPerDay;
+    private Boolean timesPerDay;
 
     @Column(name = "times_total")
-    private int timesTotal;
+    private Boolean timesTotal;
+
+    @Column(name = "max_times")
+    private int maxTimes;
 
     public Questionnaire() {
 
@@ -59,43 +63,51 @@ public class Questionnaire {
         this.introduction = introduction;
     }
 
-    public Date getBeginTime() {
+    public LocalDate getBeginTime() {
         return beginTime;
     }
 
-    public void setBeginTime(Date beginTime) {
+    public void setBeginTime(LocalDate beginTime) {
         this.beginTime = beginTime;
     }
 
-    public Date getEndTime() {
+    public LocalDate getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(LocalDate endTime) {
         this.endTime = endTime;
     }
 
-    public int getNeedRegister() {
+    public Boolean getNeedRegister() {
         return needRegister;
     }
 
-    public void setNeedRegister(int needRegister) {
+    public void setNeedRegister(Boolean needRegister) {
         this.needRegister = needRegister;
     }
 
-    public int getTimesPerDay() {
+    public Boolean getTimesPerDay() {
         return timesPerDay;
     }
 
-    public void setTimesPerDay(int timesPerDay) {
+    public void setTimesPerDay(Boolean timesPerDay) {
         this.timesPerDay = timesPerDay;
     }
 
-    public int getTimesTotal() {
+    public Boolean getTimesTotal() {
         return timesTotal;
     }
 
-    public void setTimesTotal(int timesTotal) {
+    public void setTimesTotal(Boolean timesTotal) {
         this.timesTotal = timesTotal;
+    }
+
+    public int getMaxTimes() {
+        return maxTimes;
+    }
+
+    public void setMaxTimes(int maxTimes) {
+        this.maxTimes = maxTimes;
     }
 }

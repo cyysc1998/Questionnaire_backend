@@ -15,6 +15,12 @@ public class Question {
     @Column(name = "classified_id")
     private int classifiedId;
 
+    @Column(name = "order_id")
+    private int orderId;
+
+    @Column(name = "question_id")
+    private int qId;
+
     public Question() {
 
     }
@@ -41,5 +47,21 @@ public class Question {
 
     public void setClassifiedId(int classifiedId) {
         this.classifiedId = classifiedId;
+    }
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public int getqId() {
+        return qId;
+    }
+
+    public void setqId(int qId) {
+        this.qId = qId;
     }
 }
