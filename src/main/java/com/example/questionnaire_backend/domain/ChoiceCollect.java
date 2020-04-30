@@ -3,8 +3,8 @@ package com.example.questionnaire_backend.domain;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "MultiChoices")
-public class MultiChoices {
+@Table(name = "ChoiceCollect")
+public class ChoiceCollect {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -12,13 +12,10 @@ public class MultiChoices {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "choices_list")
-    private String choicesList;
-
     @Column(name = "display")
     private int display;
 
-    public MultiChoices() {
+    public ChoiceCollect() {
 
     }
 
@@ -36,14 +33,6 @@ public class MultiChoices {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getChoicesList() {
-        return choicesList;
-    }
-
-    public void setChoicesList(String choicesList) {
-        this.choicesList = choicesList;
     }
 
     public int getDisplay() {

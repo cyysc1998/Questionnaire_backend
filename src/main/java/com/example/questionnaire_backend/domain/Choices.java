@@ -1,6 +1,7 @@
 package com.example.questionnaire_backend.domain;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "Choices")

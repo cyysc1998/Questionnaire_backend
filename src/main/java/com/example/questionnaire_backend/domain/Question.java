@@ -18,7 +18,7 @@ public class Question {
     @Column(name = "order_id")
     private int orderId;
 
-    @Column(name = "question_id")
+    @Column(name = "questionnaire_id")
     private int qId;
 
     public Question() {

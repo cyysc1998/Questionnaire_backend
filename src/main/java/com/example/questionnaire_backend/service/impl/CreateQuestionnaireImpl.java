@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.persistence.GeneratedValue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -39,6 +40,14 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     private TextCollectRepository textCollectRepository;
     @Resource
     private RateCollectRepository rateCollectRepository;
+    @Resource
+    private ChoiceCollectRepository choiceCollectRepository;
+    @Resource
+    private ChoicesRepository choicesRepository;
+    @Resource
+    private ChoiceMapRepository choiceMapRepository;
+    @Resource
+    private QuestionRepository questionRepository;
 
     private class Metadata {
         String title;
@@ -86,27 +95,33 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
 
         for(int i=0; i<questionsList.size(); i++) {
             int type = (Integer) questionsList.get(i).get("type");
+            int orderId = (Integer) questionsList.get(i).get("id");
+            int questionId = 0;
             switch (type) {
                 case 0:
                     break;
                 case 1:
+                    questionId = parseMultiChoice(questionsList.get(i));
                     break;
                 case 2:
-                    parseIntegerCollect(questionsList.get(i));
+                    questionId = parseIntegerCollect(questionsList.get(i));
                     break;
                 case 3:
-                    parseFloatCollect(questionsList.get(i));
+                    questionId = parseFloatCollect(questionsList.get(i));
                     break;
                 case 4:
-                    parseTextCollect(questionsList.get(i));
+                    questionId = parseTextCollect(questionsList.get(i));
                     break;
                 case 5:
-                    parseRateCollect(questionsList.get(i));
+                    questionId = parseRateCollect(questionsList.get(i));
                     break;
                 default:
                     break;
             }
+            insertQuestionMap(type, questionId, orderId, qId);
         }
+
+        insertUserQuestionnaire(uId, qId);
 
         return SUCCEED;
     }
@@ -150,6 +165,15 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         return SUCCEED;
     }
 
+    private void insertQuestionMap(int type, int classifiedId, int orderId, int qId) {
+        Question question = new Question();
+        question.setType(type);
+        question.setClassifiedId(classifiedId);
+        question.setOrderId(orderId);
+        question.setqId(qId);
+        questionRepository.save(question);
+    }
+
     private void insertUserQuestionnaire(int uId, int qId) {
         UserQuestionnaire userQuestionnaire = new UserQuestionnaire();
         userQuestionnaire.setqId(qId);
@@ -174,13 +198,11 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     private int parseIntegerCollect(LinkedHashMap<String, ?> integerCollectInfo) {
         IntegerCollect integerCollect = new IntegerCollect();
         LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) integerCollectInfo.get("q_content");
-        int orderId = (Integer) integerCollectInfo.get("id");
         String title = (String) content.get("intro");
         int min = Integer.parseInt ((String) content.get("min"));
         int max = Integer.parseInt ((String) content.get("max"));
         int step = Integer.parseInt ((String) content.get("step"));
         integerCollect.setTitle(title);
-        integerCollect.setId(orderId);
         integerCollect.setMin(min);
         integerCollect.setMax(max);
         integerCollect.setStep(step);
@@ -192,14 +214,12 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     private int parseFloatCollect(LinkedHashMap<String, ?> floatCollectInfo) {
         FloatCollect floatCollect = new FloatCollect();
         LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) floatCollectInfo.get("q_content");
-        int orderId = (Integer) floatCollectInfo.get("id");
         String title = (String) content.get("intro");
         Double min = Double.parseDouble ((String) content.get("min"));
         Double max = Double.parseDouble ((String) content.get("max"));
         Double step = Double.parseDouble ((String) content.get("step"));
         Double precious = Double.parseDouble ( (String) content.get("precious"));
         floatCollect.setTitle(title);
-        floatCollect.setId(orderId);
         floatCollect.setMin(min);
         floatCollect.setMax(max);
         floatCollect.setStep(step);
@@ -212,9 +232,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     private int parseTextCollect(LinkedHashMap<String, ?> textCollectInfo) {
         TextCollect textCollect = new TextCollect();
         LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) textCollectInfo.get("q_content");
-        int orderId = (Integer) textCollectInfo.get("id");
         String title = (String) content.get("intro");
-        textCollect.setId(orderId);
         textCollect.setTitle(title);
         textCollect.setDisplay(0);
         TextCollect saved = textCollectRepository.save(textCollect);
@@ -224,14 +242,40 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     private int parseRateCollect(LinkedHashMap<String, ?> rateCollectInfo) {
         RateCollect rateCollect = new RateCollect();
         LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) rateCollectInfo.get("q_content");
-        int orderId = (Integer) rateCollectInfo.get("id");
         String title = (String) content.get("intro");
         int max = Integer.parseInt((String) content.get("max"));
-        rateCollect.setId(orderId);
         rateCollect.setTitle(title);
         rateCollect.setMax(max);
         rateCollect.setDisplay(0);
         RateCollect saved = rateCollectRepository.save(rateCollect);
         return saved.getId();
+    }
+
+    private int parseMultiChoice(LinkedHashMap<String, ?> multiCollectInfo) {
+        LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) multiCollectInfo.get("q_content");
+        ArrayList<String> choicesInfo = (ArrayList<String>) ((LinkedHashMap<String, ?>)content.get("choices")).get("names");
+
+        String title = (String) content.get("intro");
+        ChoiceCollect choiceCollect = new ChoiceCollect();
+        choiceCollect.setTitle(title);
+        choiceCollect.setDisplay(0);
+        ChoiceCollect saved = choiceCollectRepository.save(choiceCollect);
+
+        int qId = saved.getId();
+
+        for(int i=0; i<choicesInfo.size(); i++) {
+            String choice = choicesInfo.get(i);
+            Choices choices = new Choices();
+            choices.setChoice(choice);
+            Choices cSaved = choicesRepository.save(choices);
+            int cId = cSaved.getId();
+
+            ChoiceMap choiceMap = new ChoiceMap();
+            choiceMap.setqId(qId);
+            choiceMap.setcId(cId);
+            choiceMapRepository.save(choiceMap);
+        }
+
+        return qId;
     }
 }

@@ -22,13 +22,13 @@ public class ChoiceLogic {
     public int getId() {
         return id;
     }
+    public int getChoiceId() {
+        return choiceId;
+    }
+
 
     public void setId(int logicId) {
         this.logicId = logicId;
-    }
-
-    public int getChoiceId() {
-        return choiceId;
     }
 
     public void setChoiceId(int choiceId) {
