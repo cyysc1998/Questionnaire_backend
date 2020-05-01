@@ -10,10 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.persistence.GeneratedValue;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
+import java.util.Set;
 
 
 @Service
@@ -47,6 +48,8 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     @Resource
     private ChoiceMapRepository choiceMapRepository;
     @Resource
+    private ChoiceLogicRepository choiceLogicRepository;
+    @Resource
     private QuestionRepository questionRepository;
 
     private class Metadata {
@@ -69,6 +72,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         int uId = (Integer) data.get("u_id");
         LinkedHashMap<String, String> metadataMap = (LinkedHashMap<String, String>) data.get("metadata");
         LinkedHashMap<String, ?> settingMap = (LinkedHashMap<String, ?>) data.get("setting");
+        LinkedHashMap<String, ?> logicInfo = (LinkedHashMap<String, ?>) data.get("related");
         ArrayList<LinkedHashMap<String, ?>> questionsList = (ArrayList<LinkedHashMap<String, ?>>) data.get("content");
 
         Metadata metadata;
@@ -99,6 +103,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
             int questionId = 0;
             switch (type) {
                 case 0:
+                    questionId = parseSingleChoice(questionsList.get(i), logicInfo);
                     break;
                 case 1:
                     questionId = parseMultiChoice(questionsList.get(i));
@@ -139,7 +144,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     private Setting getSetting(LinkedHashMap<String, ?> setting) {
         Setting parseSettingData = new Setting();
 
-        parseSettingData.setMaxTimes = (Boolean) setting.get("maxTimes");
+        parseSettingData.setMaxTimes = setting.get("maxTimes").toString().equals("1");
         parseSettingData.needRegister = setting.get("needRegister").toString().equals("1");
         parseSettingData.setMaxTimesPerDay = setting.get("maxTimesPerDay").toString().equals("1");
         parseSettingData.restrictTimes = Integer.parseInt((String) setting.get("resistrictTimes"));
@@ -274,6 +279,57 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
             choiceMap.setqId(qId);
             choiceMap.setcId(cId);
             choiceMapRepository.save(choiceMap);
+        }
+
+        return qId;
+    }
+
+    private int parseSingleChoice(LinkedHashMap<String, ?> singleCollectInfo, LinkedHashMap<String, ?> logicInfo) {
+        LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) singleCollectInfo.get("q_content");
+        ArrayList<String> choicesInfo = (ArrayList<String>) ((LinkedHashMap<String, ?>)content.get("choices")).get("names");
+        int orderedId = (Integer) singleCollectInfo.get("id");
+
+
+        String title = (String) content.get("intro");
+        ChoiceCollect choiceCollect = new ChoiceCollect();
+        choiceCollect.setTitle(title);
+        choiceCollect.setDisplay(0);
+        ChoiceCollect saved = choiceCollectRepository.save(choiceCollect);
+
+        int qId = saved.getId();
+
+
+        for(int i=0; i<choicesInfo.size(); i++) {
+            String choice = choicesInfo.get(i);
+            Choices choices = new Choices();
+            choices.setChoice(choice);
+            Choices cSaved = choicesRepository.save(choices);
+
+            int cId = cSaved.getId();
+
+            ChoiceMap choiceMap = new ChoiceMap();
+            choiceMap.setqId(qId);
+            choiceMap.setcId(cId);
+            choiceMapRepository.save(choiceMap);
+
+            Set<String> keySet = logicInfo.keySet();
+
+            for(String choiceInfo: keySet) {
+                String[] questionAndChoiceIndex = choiceInfo.split("-");
+                int questionId = Integer.parseInt(questionAndChoiceIndex[0]);
+                int choiceId = Integer.parseInt(questionAndChoiceIndex[1]);
+                if(questionId != orderedId || choiceId != i )
+                    continue;
+                ArrayList<String> relatedQuestions = (ArrayList<String>) logicInfo.get(choiceInfo);
+
+                for(String relatedQuestion: relatedQuestions) {
+                    ChoiceLogic choiceLogic = new ChoiceLogic();
+                    int relatedqId = Integer.parseInt(relatedQuestion);
+                    choiceLogic.setChoiceId(cId);
+                    choiceLogic.setLogicId(relatedqId);
+                    choiceLogicRepository.save(choiceLogic);
+                }
+            }
         }
 
         return qId;

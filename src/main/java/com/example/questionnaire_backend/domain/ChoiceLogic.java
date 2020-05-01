@@ -22,6 +22,7 @@ public class ChoiceLogic {
     public int getId() {
         return id;
     }
+
     public int getChoiceId() {
         return choiceId;
     }
