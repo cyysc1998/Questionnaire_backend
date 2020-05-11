@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @Service
@@ -32,9 +33,22 @@ public class UserManageImpl implements UserManage {
             String name = query.getName();
             String pwd = query.getPassword();
             request.getSession().setAttribute("userInfo", name + " - " + pwd);
-            request.getSession().setMaxInactiveInterval(10);
+            request.getSession().setMaxInactiveInterval(1800);
             return query.getId();
         }
+    }
+
+    @Override
+    public Boolean loginOut(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+
+        session.removeAttribute("userInfo");
+        Object userInfo = session.getAttribute("userInfo");
+
+        if(userInfo == null)
+            return true;
+        else
+            return false;
     }
 
     public int register(JSONObject user) {
@@ -71,5 +85,14 @@ public class UserManageImpl implements UserManage {
     public int registerEmailCheck(String email) {
         List<User> email_duplicate_check = userRepository.findAllByEmail(email);
         return email_duplicate_check.size()==0 ? 1:0;
+    }
+
+    public Boolean loginCheck(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Object userInfo = session.getAttribute("userInfo");
+        if(userInfo == null)
+            return false;
+        else
+            return true;
     }
 }

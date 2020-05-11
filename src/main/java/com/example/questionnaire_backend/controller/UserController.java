@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 @RestController
 public class UserController {
@@ -20,6 +21,12 @@ public class UserController {
         return userManage.login(user, request);
     }
 
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "/api/logout", produces = "application/json;charset=UTF-8")
+    public Boolean logOut(HttpServletRequest request) {
+        return userManage.loginOut(request);
+    }
 
     @CrossOrigin
     @ResponseBody
@@ -40,6 +47,13 @@ public class UserController {
     @RequestMapping(value = "/api/register/namecheck")
     public int registerNameCheck(@RequestParam String name) {
         return userManage.registerNameCheck(name);
+    }
+
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "/api/islogin")
+    public Boolean isLogin(HttpServletRequest request) {
+        return userManage.loginCheck(request);
     }
 }
 
