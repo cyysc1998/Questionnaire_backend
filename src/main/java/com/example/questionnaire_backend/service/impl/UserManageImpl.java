@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
@@ -16,14 +17,24 @@ public class UserManageImpl implements UserManage {
     @Resource
     private UserRepository userRepository;
 
+    private final int USERNAME_ERROR = -2;
+    private final int PASSWORD_ERROR = -1;
+    private final int LOGIN_SUCCEED = 0;
 
-    public int login(JSONObject user) {
+
+    public int login(JSONObject user, HttpServletRequest request) {
         User query = userRepository.findByName(user.get("username").toString());
         if(query == null)
-            return -2;
+            return USERNAME_ERROR;
         else if(!query.getPassword().equals(user.get("password").toString()))
-            return -1;
-        return query.getId();
+            return PASSWORD_ERROR;
+        else {
+            String name = query.getName();
+            String pwd = query.getPassword();
+            request.getSession().setAttribute("userInfo", name + " - " + pwd);
+            request.getSession().setMaxInactiveInterval(10);
+            return query.getId();
+        }
     }
 
     public int register(JSONObject user) {

@@ -5,6 +5,7 @@ import net.minidev.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class UserController {
@@ -15,8 +16,8 @@ public class UserController {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "/api/login", produces = "application/json;charset=UTF-8")
-    public int login(@RequestBody JSONObject user) {
-        return userManage.login(user);
+    public int login(@RequestBody JSONObject user, HttpServletRequest request) {
+        return userManage.login(user, request);
     }
 
 
