@@ -211,7 +211,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         integerCollect.setMin(min);
         integerCollect.setMax(max);
         integerCollect.setStep(step);
-        integerCollect.setDisplay(0);
+        integerCollect.setDisplay(1);
         IntegerCollect saved = integerCollectRepository.save(integerCollect);
         return saved.getId();
     }
@@ -229,7 +229,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         floatCollect.setMax(max);
         floatCollect.setStep(step);
         floatCollect.setPrecious(precious);
-        floatCollect.setDisplay(0);
+        floatCollect.setDisplay(1);
         FloatCollect saved = floatCollectRepository.save(floatCollect);
         return saved.getId();
     }
@@ -239,7 +239,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) textCollectInfo.get("q_content");
         String title = (String) content.get("intro");
         textCollect.setTitle(title);
-        textCollect.setDisplay(0);
+        textCollect.setDisplay(1);
         TextCollect saved = textCollectRepository.save(textCollect);
         return saved.getId();
     }
@@ -251,7 +251,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         int max = Integer.parseInt((String) content.get("max"));
         rateCollect.setTitle(title);
         rateCollect.setMax(max);
-        rateCollect.setDisplay(0);
+        rateCollect.setDisplay(1);
         RateCollect saved = rateCollectRepository.save(rateCollect);
         return saved.getId();
     }
@@ -263,7 +263,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         String title = (String) content.get("intro");
         ChoiceCollect choiceCollect = new ChoiceCollect();
         choiceCollect.setTitle(title);
-        choiceCollect.setDisplay(0);
+        choiceCollect.setDisplay(1);
         ChoiceCollect saved = choiceCollectRepository.save(choiceCollect);
 
         int qId = saved.getId();
@@ -293,7 +293,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         String title = (String) content.get("intro");
         ChoiceCollect choiceCollect = new ChoiceCollect();
         choiceCollect.setTitle(title);
-        choiceCollect.setDisplay(0);
+        choiceCollect.setDisplay(1);
         ChoiceCollect saved = choiceCollectRepository.save(choiceCollect);
 
         int qId = saved.getId();
