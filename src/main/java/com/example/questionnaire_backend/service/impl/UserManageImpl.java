@@ -31,8 +31,8 @@ public class UserManageImpl implements UserManage {
             return PASSWORD_ERROR;
         else {
             String name = query.getName();
-            String pwd = query.getPassword();
-            request.getSession().setAttribute("userInfo", name + " - " + pwd);
+            Integer uId = query.getId();
+            request.getSession().setAttribute("userInfo", uId + "-" + name);
             request.getSession().setMaxInactiveInterval(1800);
             return query.getId();
         }

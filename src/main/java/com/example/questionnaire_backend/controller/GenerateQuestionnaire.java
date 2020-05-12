@@ -5,6 +5,7 @@ import net.minidev.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class GenerateQuestionnaire {
@@ -14,7 +15,7 @@ public class GenerateQuestionnaire {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "/api/editor", produces = "application/json;charset=UTF-8")
-    public int login(@RequestBody JSONObject data) {
-        return createQuestionnaire.create(data);
+    public int login(@RequestBody JSONObject data, HttpServletRequest request) {
+        return createQuestionnaire.create(data, request);
     }
 }

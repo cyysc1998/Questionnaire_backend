@@ -17,6 +17,7 @@ public class LoginConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/register/namecheck")
                 .excludePathPatterns("/api/register/emailcheck")
                 .excludePathPatterns("/api/islogin")
-                .excludePathPatterns("/api/resolve");
+                .excludePathPatterns("/api/resolve")
+                .excludePathPatterns("/api/submit");
     }
 }

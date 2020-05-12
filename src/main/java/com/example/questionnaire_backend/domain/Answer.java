@@ -13,10 +13,13 @@ public class Answer {
     private int uID;
 
     @Column(name = "q_Id")
-    private int pId;
+    private int qId;
 
     @Column(name = "answer")
     private String answer;
+
+    @Column(name = "order_Id")
+    private  int orderId;
 
     public Answer() {
 
@@ -30,12 +33,12 @@ public class Answer {
         this.id = id;
     }
 
-    public int getpId() {
-        return pId;
+    public int getqId() {
+        return qId;
     }
 
-    public void setpId(int pId) {
-        this.pId = pId;
+    public void setqId(int qId) {
+        this.qId = qId;
     }
 
     public int getuID() {
@@ -52,5 +55,13 @@ public class Answer {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 }

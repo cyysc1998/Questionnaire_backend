@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.persistence.GeneratedValue;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -66,10 +68,16 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         LocalDate finishTime;
     }
 
-    public int create(JSONObject data) {
+    public int create(JSONObject data, HttpServletRequest request) {
         System.out.println(data);
 
-        int uId = (Integer) data.get("u_id");
+        HttpSession session = request.getSession();
+        String userInfo = (String) session.getAttribute("userInfo");
+        String[] info = userInfo.split("-");
+
+        int uId = Integer.parseInt(info[0]);
+
+
         LinkedHashMap<String, String> metadataMap = (LinkedHashMap<String, String>) data.get("metadata");
         LinkedHashMap<String, ?> settingMap = (LinkedHashMap<String, ?>) data.get("setting");
         LinkedHashMap<String, ?> logicInfo = (LinkedHashMap<String, ?>) data.get("related");

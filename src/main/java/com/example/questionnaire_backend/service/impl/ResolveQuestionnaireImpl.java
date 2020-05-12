@@ -171,6 +171,7 @@ public class ResolveQuestionnaireImpl  implements ResolveQuestionnaire {
         Boolean display = rateQuestion.get().getDisplay() == 1;
         double max = rateQuestion.get().getMax();
 
+        question.put("type", RATE_COLLECTION_TYPE);
         question.put("intro", title);
         question.put("display", display);
         question.put("max", max);
