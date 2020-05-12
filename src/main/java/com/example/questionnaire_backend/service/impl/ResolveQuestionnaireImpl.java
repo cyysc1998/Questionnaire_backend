@@ -52,13 +52,9 @@ public class ResolveQuestionnaireImpl  implements ResolveQuestionnaire {
         List<Question> questions = questionRepository.findAllByqId(qId);
         Optional<Questionnaire> questionnaireInfo = questionnaireRepository.findById(qId);
         questionnaire.put("title", questionnaireInfo.get().getTitle());
+        questionnaire.put("intro", questionnaireInfo.get().getIntroduction());
 
         ArrayList<JSONObject> resolvedQuestions = new ArrayList<JSONObject>();
-
-//        for(int i=0; i<questions.size(); i++)
-//            questionnaire.put(i + "", questions.get(i));
-
-
 
         for(int i=0; i<questions.size(); i++) {
             Question question =  questions.get(i);

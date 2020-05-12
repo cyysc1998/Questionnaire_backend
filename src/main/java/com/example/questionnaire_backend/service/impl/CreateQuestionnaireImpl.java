@@ -128,7 +128,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
 
         insertUserQuestionnaire(uId, qId);
 
-        return SUCCEED;
+        return qId;
     }
 
 
@@ -331,7 +331,6 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
                 }
             }
         }
-
         return qId;
     }
 }
