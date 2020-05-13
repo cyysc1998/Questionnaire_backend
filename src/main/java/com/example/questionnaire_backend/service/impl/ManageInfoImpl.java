@@ -23,6 +23,14 @@ import java.util.*;
 @Service
 @Transactional
 public class ManageInfoImpl implements ManageInfo {
+
+    private final int SINGLE_CHOICE_TYPE = 0;
+    private final int MULTI_CHOICES_TYPE = 1;
+    private final int INTEGER_COLLECTION_TYPE = 2;
+    private final int FLOAT_COLLECTION_TYPE = 3;
+    private final int TEXT_COLLECTION_TYPE = 4;
+    private final int RATE_COLLECTION_TYPE = 5;
+
     @Resource
     private UserQuestionnaireRepository userQuestionnaireRepository;
     @Resource
@@ -80,30 +88,58 @@ public class ManageInfoImpl implements ManageInfo {
         LinkedHashMap<String, ?> answers = (LinkedHashMap<String, ?>) answer.get("answer");
 
         Set<String> answersNumberSet = answers.keySet();
-        List<Question> questions = questionRepository.findAllByqId(qId);
+
         for(String answerKey: answersNumberSet) {
             int orderId = Integer.parseInt(answerKey) + 1;
             Question question = questionRepository.findByqIdAndOrderId(qId, orderId);
             int type = question.getType();
-            if(type != 1) {
-                String answerContent = (String) answer.get(answerKey);
-                Answer answerTuple = new Answer();
+
+            Answer answerTuple = new Answer();
+
+            if(type == MULTI_CHOICES_TYPE){
+                ArrayList<Integer> answerContents = (ArrayList<Integer>) answers.get(answerKey);
+                String answerContent = null;
+                Boolean is_first = true;
+                for(int i=0; i<answerContents.size(); i++) {
+                    String s = answerContents.get(i).toString();
+                    if(is_first) {
+                        answerContent = s;
+                        is_first = false;
+                    }
+                    else
+                answerContent = answerContent + "-" + s;
+            }
                 answerTuple.setuID(uId);
                 answerTuple.setqId(qId);
                 answerTuple.setOrderId(orderId);
                 answerTuple.setAnswer(answerContent);
             }
-            else {
-                ArrayList<String> answerContents = (ArrayList<String>) answer.get(answerKey);
-                for(int i=0; i<answerContents.size(); i++) {
-                    String answerContent = answerContents.get(i);
-                    Answer answerTuple = new Answer();
-                    answerTuple.setuID(uId);
-                    answerTuple.setqId(qId);
-                    answerTuple.setOrderId(orderId);
-                    answerTuple.setAnswer(answerContent);
-                }
+            else if(type == FLOAT_COLLECTION_TYPE || type == RATE_COLLECTION_TYPE) {
+                String answerContent = null;
+                if(answers.get(answerKey) instanceof Double)
+                    answerContent = ((Double) answers.get(answerKey)).toString();
+                else
+                    answerContent = ((Integer) answers.get(answerKey)).toString();
+                answerTuple.setuID(uId);
+                answerTuple.setqId(qId);
+                answerTuple.setOrderId(orderId);
+                answerTuple.setAnswer(answerContent);
             }
+            else if(type == TEXT_COLLECTION_TYPE) {
+                String answerContent = (String) answers.get(answerKey);
+                answerTuple.setuID(uId);
+                answerTuple.setqId(qId);
+                answerTuple.setOrderId(orderId);
+                answerTuple.setAnswer(answerContent);
+            }
+            else if(type == SINGLE_CHOICE_TYPE || type == INTEGER_COLLECTION_TYPE){
+                String answerContent = ((Integer) answers.get(answerKey)).toString();
+                answerTuple.setuID(uId);
+                answerTuple.setqId(qId);
+                answerTuple.setOrderId(orderId);
+                answerTuple.setAnswer(answerContent);
+            }
+            answerRepository.save(answerTuple);
         }
 
 
