@@ -10,7 +10,6 @@ import com.example.questionnaire_backend.repository.QuestionnaireRepository;
 import com.example.questionnaire_backend.repository.UserQuestionnaireRepository;
 import com.example.questionnaire_backend.service.ManageInfo;
 import net.minidev.json.JSONObject;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -64,6 +65,7 @@ public class ManageInfoImpl implements ManageInfo {
                 description = description.substring(0, 9);
             description = description + "......";
 
+            question.put("qId", qId);
             question.put("title", title);
             question.put("description", description);
 
@@ -144,6 +146,34 @@ public class ManageInfoImpl implements ManageInfo {
 
 
         System.out.println(answers);
+        return true;
+    }
+
+    public Boolean modified(@RequestBody JSONObject info, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String userInfo = (String) session.getAttribute("userInfo");
+        String[] user = userInfo.split("-");
+        int uId = Integer.parseInt(user[0]);
+
+        int questionnaireId = (Integer) info.get("questionnaireId");
+        String title = (String) info.get("title");
+        String intro = (String) info.get("intro");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate finishTime = LocalDate.parse((String) info.get("finishTime"), formatter);
+
+
+        UserQuestionnaire userQuestionnaire = userQuestionnaireRepository.findByqId(questionnaireId);
+        if(userQuestionnaire == null || userQuestionnaire.getuId() != uId)
+            return false;
+        else {
+            Optional<Questionnaire> questionnaireById = questionnaireRepository.findById(questionnaireId);
+            Questionnaire questionnaire = questionnaireById.get();
+            questionnaire.setTitle(title);
+            questionnaire.setIntroduction(intro);
+            questionnaire.setEndTime(finishTime);
+            questionnaireRepository.save(questionnaire);
+        }
         return true;
     }
 }

@@ -24,7 +24,14 @@ public class ManageQuestionnaire {
     @ResponseBody
     @RequestMapping(value = "/api/submit", produces = "application/json;charset=UTF-8")
     public Boolean submit(@RequestBody JSONObject answer, HttpServletRequest request) {
-        return  manageInfo.submit(answer, request);
+        return manageInfo.submit(answer, request);
+    }
+
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "/api/modified", produces = "application/json;charset=UTF-8")
+    public Boolean modified(@RequestBody JSONObject info, HttpServletRequest request) {
+        return manageInfo.modified(info, request);
     }
 
 }
