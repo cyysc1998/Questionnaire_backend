@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 
 @Service
 @Transactional
@@ -210,6 +212,7 @@ public class ManageInfoImpl implements ManageInfo {
             result.put("verify", false);
         else {
             result.put("verify", true);
+            System.out.println(qId);
             Questionnaire questionnaire = questionnaireRepository.findById(qId).get();
 
             JSONObject metadata = new JSONObject();
@@ -252,64 +255,193 @@ public class ManageInfoImpl implements ManageInfo {
                 curAnswer.put("type", type);
 
                 switch (type) {
+                    case SINGLE_CHOICE_TYPE:
+                        ChoiceCollect choiceCollectSingle = choiceCollectRepository.findById(classifiedId).get();
+                        String questionSingle = choiceCollectSingle.getTitle();
+                        curAnswer.put("type", SINGLE_CHOICE_TYPE);
+                        curAnswer.put("question", questionSingle);
+                        curAnswer.put("choices", analysisSingle(qId, key, classifiedId));
+                        break;
+                    case MULTI_CHOICES_TYPE:
+                        ChoiceCollect choiceCollectMulti = choiceCollectRepository.findById(classifiedId).get();
+                        String questionMulti = choiceCollectMulti.getTitle();
+                        curAnswer.put("type", MULTI_CHOICES_TYPE);
+                        curAnswer.put("question", questionMulti);
+                        curAnswer.put("choices", analysisMulti(qId, key, classifiedId));
+                        break;
                     case INTEGER_COLLECTION_TYPE:
                         IntegerCollect integerCollect = integerCollectRepository.findById(classifiedId).get();
                         String questionInteger = integerCollect.getTitle();
+                        curAnswer.put("type", INTEGER_COLLECTION_TYPE);
                         curAnswer.put("question", questionInteger);
-                        curAnswer.put("answerList", analysisIntegerAnswer(qId, key));
+                        curAnswer.put("answerList", analysisCommonAnswer(qId, key));
                         statistic(qId, key, curAnswer);
-
                         break;
+
                     case FLOAT_COLLECTION_TYPE:
                         FloatCollect floatCollect = floatCollectRepository.findById(classifiedId).get();
                         String questionFloat = floatCollect.getTitle();
+                        curAnswer.put("type", FLOAT_COLLECTION_TYPE);
                         curAnswer.put("question", questionFloat);
-                        curAnswer.put("answerList", analysisFloatAnswer(qId, key));
+                        curAnswer.put("answerList", analysisCommonAnswer(qId, key));
                         statistic(qId, key, curAnswer);
-
                         break;
+
+                    case TEXT_COLLECTION_TYPE:
+                        TextCollect textCollect = textCollectRepository.findById(classifiedId).get();
+                        String questionText = textCollect.getTitle();
+                        curAnswer.put("type", TEXT_COLLECTION_TYPE);
+                        curAnswer.put("question", questionText);
+                        curAnswer.put("answerList", analysisCommonAnswer(qId, key));
+                        break;
+
+                    case RATE_COLLECTION_TYPE:
+                        RateCollect rateCollect = rateCollectRepository.findById(classifiedId).get();
+                        String questionRate = rateCollect.getTitle();
+                        int count = rateCollect.getMax();
+                        curAnswer.put("type", RATE_COLLECTION_TYPE);
+                        curAnswer.put("question", questionRate);
+                        curAnswer.put("answerList", analysisRateAnswer(qId, key, count));
                 }
+                answer.add(curAnswer);
             }
+            result.put("answer", answer);
         }
-
-
-
-
 
 
 
         return result;
     }
 
+    public List<JSONObject> analysisSingle(int qId, int key, int classifiedId) {
+        List<JSONObject> choices = new LinkedList<>();
+        List<ChoiceMap> choiceMaps = choiceMapRepository.findAllByqId(classifiedId);
+
+        LinkedList<String> choicesContent = new LinkedList<>();
+        String[] users = new String[choiceMaps.size()];
+        int[] number = new int[choiceMaps.size()];
+        int sum = 0;
+
+        for(int i=0; i<choiceMaps.size(); i++) {
+            int choiceId = choiceMaps.get(i).getcId();
+            Choices choiceTuple = choicesRepository.findById(choiceId).get();
+            String choiceContent = choiceTuple.getChoice();
+            choicesContent.add(choiceContent);
+        }
+
+        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+
+        for(int i = 0; i < answers.size(); i++) {
+            Answer curAnswer = answers.get(i);
+            int answer = Integer.parseInt(curAnswer.getAnswer());
+            int uId = curAnswer.getuID();
+
+            String userName = getUserName(uId);
+
+            if(users[answer] == null || users[answer] == "")
+                users[answer] = userName;
+            else
+                users[answer] += ", " + userName;
+            number[answer]++;
+            sum++;
+        }
+
+        for(int i = 0; i < choiceMaps.size(); i++) {
+            JSONObject answer = new JSONObject();
+            answer.put("key", i + 1);
+            answer.put("order", "选项" + (i+1));
+            answer.put("answer", choiceMaps.get(i));
+            answer.put("userNumber", number[i]);
+            answer.put("percent", 1.0 * number[i] / sum);
+            answer.put("userList", users[i]);
+            choices.add(answer);
+        }
+
+        return choices;
+    }
 
 
-    public JSONObject analysisIntegerAnswer(int qId, int key) {
-        JSONObject answerList = new JSONObject();
+    public List<JSONObject> analysisMulti(int qId, int key, int classifiedId) {
+        List<JSONObject> choices = new LinkedList<>();
+        List<ChoiceMap> choiceMaps = choiceMapRepository.findAllByqId(classifiedId);
+        LinkedList<String> choicesContent = new LinkedList<>();
+        String[] users = new String[choiceMaps.size()];
+        int[] number = new int[choiceMaps.size()];
+        int sum = 0;
+
+        for(int i=0; i<choiceMaps.size(); i++) {
+            int choiceId = choiceMaps.get(i).getcId();
+            Choices choiceTuple = choicesRepository.findById(choiceId).get();
+            String choiceContent = choiceTuple.getChoice();
+            choicesContent.add(choiceContent);
+        }
+
+        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+
+        for(int i = 0; i < answers.size(); i++) {
+            Answer curAnswer = answers.get(i);
+            String[] splitAnswer = curAnswer.getAnswer().split("-");
+            for(int j=0; j<splitAnswer.length; j++) {
+                int answer = Integer.parseInt(splitAnswer[j]);
+                int uId = curAnswer.getuID();
+
+                String userName = getUserName(uId);
+
+                if(users[answer] == null || users[answer] == "")
+                    users[answer] = userName;
+                else
+                    users[answer] += ", " + userName;
+                number[answer]++;
+                sum++;
+            }
+        }
+
+        for(int i = 0; i < choiceMaps.size(); i++) {
+            JSONObject answer = new JSONObject();
+            answer.put("key", i + 1);
+            answer.put("order", "选项" + (i+1));
+            answer.put("answer", choiceMaps.get(i));
+            answer.put("userNumber", number[i]);
+            answer.put("percent", 1.0 * number[i] / sum);
+            answer.put("userList", users[i]);
+            choices.add(answer);
+        }
+        return choices;
+    }
+
+
+
+    public List<JSONObject> analysisCommonAnswer(int qId, int key) {
+        List<JSONObject> answerList = new LinkedList<>();
         List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
         for(int i=0; i<answers.size(); i++) {
+            JSONObject answer = new JSONObject();
             Answer curAnswer = answers.get(i);
-            answerList.put("key", i+1);
-            answerList.put("answer", curAnswer.getAnswer());
+            answer.put("key", i+1);
+            answer.put("answer", curAnswer.getAnswer());
             int uId = curAnswer.getuID();
-            User user = userRepository.findById(uId).get();
-            answerList.put("user", user.getName());
+            String userName = getUserName(uId);
+            answer.put("user", userName);
+            answerList.add(answer);
         }
         return answerList;
     }
 
-    public Object analysisFloatAnswer(int qId, int key) {
-        JSONObject answerList = new JSONObject();
+    public List<JSONObject> analysisRateAnswer(int qId, int key, int count) {
+        List<JSONObject> answerList = new LinkedList<>();
         List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
         for(int i=0; i<answers.size(); i++) {
+            JSONObject answer = new JSONObject();
             Answer curAnswer = answers.get(i);
-            answerList.put("key", i+1);
-            answerList.put("answer", curAnswer.getAnswer());
+            answer.put("key", i+1);
+            answer.put("answer", curAnswer.getAnswer() + "/" + count);
             int uId = curAnswer.getuID();
-            User user = userRepository.findById(uId).get();
-            answerList.put("user", user.getName());
+            String userName = getUserName(uId);
+            answer.put("user", userName);
         }
         return answerList;
     }
+
 
     public void statistic(int qId, int key, JSONObject curAnswer) {
         ArrayList<Double> numberList = new ArrayList<>();
@@ -325,7 +457,12 @@ public class ManageInfoImpl implements ManageInfo {
         curAnswer.put("mode", Statistic.mode(numberList));
     }
 
-
-
+    String getUserName(int uId) {
+        if(uId < 0)
+            return "anonymous";
+        User user = userRepository.findById(uId).get();
+        String userName = user.getName();
+        return userName;
+    }
 
 }
