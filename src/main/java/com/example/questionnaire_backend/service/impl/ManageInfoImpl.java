@@ -1,15 +1,13 @@
 package com.example.questionnaire_backend.service.impl;
 
-import com.example.questionnaire_backend.domain.Answer;
-import com.example.questionnaire_backend.domain.Question;
-import com.example.questionnaire_backend.domain.Questionnaire;
-import com.example.questionnaire_backend.domain.UserQuestionnaire;
-import com.example.questionnaire_backend.repository.AnswerRepository;
-import com.example.questionnaire_backend.repository.QuestionRepository;
-import com.example.questionnaire_backend.repository.QuestionnaireRepository;
-import com.example.questionnaire_backend.repository.UserQuestionnaireRepository;
+import com.alibaba.fastjson.JSON;
+import com.example.questionnaire_backend.domain.*;
+import com.example.questionnaire_backend.repository.*;
 import com.example.questionnaire_backend.service.ManageInfo;
+import com.example.questionnaire_backend.service.impl.tools.Statistic;
 import net.minidev.json.JSONObject;
+import org.apache.tomcat.jni.Local;
+import org.springframework.jmx.export.naming.IdentityNamingStrategy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -33,6 +33,8 @@ public class ManageInfoImpl implements ManageInfo {
     private final int RATE_COLLECTION_TYPE = 5;
 
     @Resource
+    private UserRepository userRepository;
+    @Resource
     private UserQuestionnaireRepository userQuestionnaireRepository;
     @Resource
     private QuestionnaireRepository questionnaireRepository;
@@ -40,6 +42,20 @@ public class ManageInfoImpl implements ManageInfo {
     private AnswerRepository answerRepository;
     @Resource
     private QuestionRepository questionRepository;
+    @Resource
+    private ChoiceCollectRepository choiceCollectRepository;
+    @Resource
+    private TextCollectRepository textCollectRepository;
+    @Resource
+    private IntegerCollectRepository integerCollectRepository;
+    @Resource
+    private FloatCollectRepository floatCollectRepository;
+    @Resource
+    private RateCollectRepository rateCollectRepository;
+    @Resource
+    private ChoiceMapRepository choiceMapRepository;
+    @Resource
+    private ChoicesRepository choicesRepository;
 
     @Override
     public JSONObject manage(HttpServletRequest request) {
@@ -144,6 +160,10 @@ public class ManageInfoImpl implements ManageInfo {
             answerRepository.save(answerTuple);
         }
 
+        Questionnaire questionnaire = questionnaireRepository.findById(qId).get();
+        int curAnswerNumber = questionnaire.getAnswerNumber();
+        questionnaire.setAnswerNumber(curAnswerNumber + 1);
+        questionnaireRepository.save(questionnaire);
 
         System.out.println(answers);
         return true;
@@ -176,4 +196,136 @@ public class ManageInfoImpl implements ManageInfo {
         }
         return true;
     }
+
+    public JSONObject analysis(int qId, HttpServletRequest request) {
+        JSONObject result = new JSONObject();
+
+        HttpSession session = request.getSession();
+        String userInfo = (String) session.getAttribute("userInfo");
+        String[] user = userInfo.split("-");
+        int uId = Integer.parseInt(user[0]);
+
+        UserQuestionnaire userQuestionnaire = userQuestionnaireRepository.findByqId(qId);
+        if(userQuestionnaire == null || userQuestionnaire.getuId() != uId)
+            result.put("verify", false);
+        else {
+            result.put("verify", true);
+            Questionnaire questionnaire = questionnaireRepository.findById(qId).get();
+
+            JSONObject metadata = new JSONObject();
+
+            LocalDate startTime = questionnaire.getBeginTime();
+            LocalDate finishTime = questionnaire.getEndTime();
+            Date date = new Date();
+            Instant instant = date.toInstant();
+            ZoneId zoneId = ZoneId.systemDefault();
+            LocalDate curDate = instant.atZone(zoneId).toLocalDate();
+
+            if(curDate.isBefore(startTime))
+                metadata.put("state", "未开始");
+            else if(curDate.isBefore(finishTime))
+                metadata.put("state", "进行中");
+            else
+                metadata.put("state", "已结束");
+
+            metadata.put("title", questionnaire.getTitle());
+            metadata.put("intro", questionnaire.getIntroduction());
+            metadata.put("startTime", startTime);
+            metadata.put("finishTime", finishTime);
+            metadata.put("answerNumber", questionnaire.getAnswerNumber());
+
+            result.put("metadata", metadata);
+
+
+            LinkedList<JSONObject> answer = new LinkedList<>();
+            List<Question> questions = questionRepository.findAllByqId(qId);
+
+            for(int i = 0; i < questions.size(); i++) {
+                JSONObject curAnswer = new JSONObject();
+
+                Question curQuestion = questions.get(i);
+                int key =  i + 1;
+                int type = curQuestion.getType();
+                int classifiedId = curQuestion.getClassifiedId();
+
+                curAnswer.put("key", key);
+                curAnswer.put("type", type);
+
+                switch (type) {
+                    case INTEGER_COLLECTION_TYPE:
+                        IntegerCollect integerCollect = integerCollectRepository.findById(classifiedId).get();
+                        String questionInteger = integerCollect.getTitle();
+                        curAnswer.put("question", questionInteger);
+                        curAnswer.put("answerList", analysisIntegerAnswer(qId, key));
+                        statistic(qId, key, curAnswer);
+
+                        break;
+                    case FLOAT_COLLECTION_TYPE:
+                        FloatCollect floatCollect = floatCollectRepository.findById(classifiedId).get();
+                        String questionFloat = floatCollect.getTitle();
+                        curAnswer.put("question", questionFloat);
+                        curAnswer.put("answerList", analysisFloatAnswer(qId, key));
+                        statistic(qId, key, curAnswer);
+
+                        break;
+                }
+            }
+        }
+
+
+
+
+
+
+
+        return result;
+    }
+
+
+
+    public JSONObject analysisIntegerAnswer(int qId, int key) {
+        JSONObject answerList = new JSONObject();
+        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        for(int i=0; i<answers.size(); i++) {
+            Answer curAnswer = answers.get(i);
+            answerList.put("key", i+1);
+            answerList.put("answer", curAnswer.getAnswer());
+            int uId = curAnswer.getuID();
+            User user = userRepository.findById(uId).get();
+            answerList.put("user", user.getName());
+        }
+        return answerList;
+    }
+
+    public Object analysisFloatAnswer(int qId, int key) {
+        JSONObject answerList = new JSONObject();
+        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        for(int i=0; i<answers.size(); i++) {
+            Answer curAnswer = answers.get(i);
+            answerList.put("key", i+1);
+            answerList.put("answer", curAnswer.getAnswer());
+            int uId = curAnswer.getuID();
+            User user = userRepository.findById(uId).get();
+            answerList.put("user", user.getName());
+        }
+        return answerList;
+    }
+
+    public void statistic(int qId, int key, JSONObject curAnswer) {
+        ArrayList<Double> numberList = new ArrayList<>();
+        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        for(int j=0; j<answers.size(); j++) {
+            numberList.add(Double.parseDouble(answers.get(j).getAnswer()));
+        }
+        curAnswer.put("min", Statistic.min(numberList));
+        curAnswer.put("max", Statistic.max(numberList));
+        curAnswer.put("sum", Statistic.sum(numberList));
+        curAnswer.put("average", Statistic.average(numberList));
+        curAnswer.put("median", Statistic.median(numberList));
+        curAnswer.put("mode", Statistic.mode(numberList));
+    }
+
+
+
+
 }

@@ -34,4 +34,11 @@ public class ManageQuestionnaire {
         return manageInfo.modified(info, request);
     }
 
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "/api/analysis", produces = "application/json;charset=UTF-8")
+    public JSONObject analysis(@RequestParam int qId, HttpServletRequest request) {
+        return  manageInfo.analysis(qId, request);
+    }
+
 }

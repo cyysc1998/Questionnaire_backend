@@ -35,6 +35,17 @@ public class Questionnaire {
     @Column(name = "max_times")
     private int maxTimes;
 
+    public int getAnswerNumber() {
+        return answerNumber;
+    }
+
+    public void setAnswerNumber(int answerNumber) {
+        this.answerNumber = answerNumber;
+    }
+
+    @Column(name = "answer_number")
+    private int answerNumber;
+
     public Questionnaire() {
 
     }

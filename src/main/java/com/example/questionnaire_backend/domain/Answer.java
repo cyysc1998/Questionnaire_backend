@@ -19,7 +19,7 @@ public class Answer {
     private String answer;
 
     @Column(name = "order_Id")
-    private  int orderId;
+    private int orderId;
 
     public Answer() {
 
