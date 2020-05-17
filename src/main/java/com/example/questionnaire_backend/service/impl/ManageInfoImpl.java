@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -302,6 +303,8 @@ public class ManageInfoImpl implements ManageInfo {
                         curAnswer.put("type", RATE_COLLECTION_TYPE);
                         curAnswer.put("question", questionRate);
                         curAnswer.put("answerList", analysisRateAnswer(qId, key, count));
+                        curAnswer.put("count", count);
+                        statistic(qId, key, curAnswer);
                 }
                 answer.add(curAnswer);
             }
@@ -346,13 +349,14 @@ public class ManageInfoImpl implements ManageInfo {
             sum++;
         }
 
+        DecimalFormat df = new DecimalFormat("######0.00");
         for(int i = 0; i < choiceMaps.size(); i++) {
             JSONObject answer = new JSONObject();
             answer.put("key", i + 1);
             answer.put("order", "选项" + (i+1));
-            answer.put("answer", choiceMaps.get(i));
+            answer.put("answer", choicesContent.get(i));
             answer.put("userNumber", number[i]);
-            answer.put("percent", 1.0 * number[i] / sum);
+            answer.put("percent", df.format(1.0 * number[i] / sum));
             answer.put("userList", users[i]);
             choices.add(answer);
         }
@@ -396,13 +400,14 @@ public class ManageInfoImpl implements ManageInfo {
             }
         }
 
+        DecimalFormat df = new DecimalFormat("######0.00");
         for(int i = 0; i < choiceMaps.size(); i++) {
             JSONObject answer = new JSONObject();
             answer.put("key", i + 1);
             answer.put("order", "选项" + (i+1));
-            answer.put("answer", choiceMaps.get(i));
+            answer.put("answer", choicesContent.get(i));
             answer.put("userNumber", number[i]);
-            answer.put("percent", 1.0 * number[i] / sum);
+            answer.put("percent", df.format(1.0 * number[i] / sum));
             answer.put("userList", users[i]);
             choices.add(answer);
         }
@@ -438,6 +443,7 @@ public class ManageInfoImpl implements ManageInfo {
             int uId = curAnswer.getuID();
             String userName = getUserName(uId);
             answer.put("user", userName);
+            answerList.add(answer);
         }
         return answerList;
     }
@@ -459,7 +465,7 @@ public class ManageInfoImpl implements ManageInfo {
 
     String getUserName(int uId) {
         if(uId < 0)
-            return "anonymous";
+            return "匿名用户";
         User user = userRepository.findById(uId).get();
         String userName = user.getName();
         return userName;

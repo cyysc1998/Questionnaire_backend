@@ -237,7 +237,7 @@ public class ResolveQuestionnaireImpl  implements ResolveQuestionnaire {
             List<ChoiceLogic> logic = choiceLogicRepository.findAllByChoiceId(choiceId);
             for(int j=0; j<logic.size(); j++) {
                 int relatedQuestionId = logic.get(j).getLogicId();
-                relatedQuestion.add(relatedQuestionId);
+                relatedQuestion.add(relatedQuestionId - 1);
             }
             if(relatedQuestion.isEmpty())
                 relatedQuestion.add(-1);

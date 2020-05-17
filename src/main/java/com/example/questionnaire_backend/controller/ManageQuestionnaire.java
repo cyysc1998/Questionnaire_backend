@@ -37,8 +37,9 @@ public class ManageQuestionnaire {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "/api/analysis", produces = "application/json;charset=UTF-8")
-    public JSONObject analysis(@RequestParam int qId, HttpServletRequest request) {
-        return  manageInfo.analysis(qId, request);
+    public JSONObject analysis(@RequestBody JSONObject info, HttpServletRequest request) {
+        int qId = (Integer) info.get("qId");
+        return manageInfo.analysis(qId, request);
     }
 
 }
