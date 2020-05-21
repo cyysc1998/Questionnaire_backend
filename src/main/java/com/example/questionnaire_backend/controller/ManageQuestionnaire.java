@@ -42,4 +42,12 @@ public class ManageQuestionnaire {
         return manageInfo.analysis(qId, request);
     }
 
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "/api/delete", produces = "application/json;charset=UTF-8")
+    public JSONObject delete(@RequestBody JSONObject info, HttpServletRequest request) {
+        int qId = (Integer) info.get("qId");
+        return manageInfo.delete(qId, request);
+    }
+
 }

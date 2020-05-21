@@ -10,4 +10,5 @@ public interface ManageInfo {
     Boolean submit(JSONObject answer, HttpServletRequest request);
     Boolean modified(JSONObject info, HttpServletRequest request);
     JSONObject analysis(int qId, HttpServletRequest request);
+    JSONObject delete(int qId, HttpServletRequest request);
 }

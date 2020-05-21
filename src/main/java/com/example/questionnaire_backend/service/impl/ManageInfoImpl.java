@@ -316,6 +316,8 @@ public class ManageInfoImpl implements ManageInfo {
         return result;
     }
 
+
+
     public List<JSONObject> analysisSingle(int qId, int key, int classifiedId) {
         List<JSONObject> choices = new LinkedList<>();
         List<ChoiceMap> choiceMaps = choiceMapRepository.findAllByqId(classifiedId);
@@ -471,4 +473,23 @@ public class ManageInfoImpl implements ManageInfo {
         return userName;
     }
 
+    @Override
+    public JSONObject delete(int qId, HttpServletRequest request) {
+        JSONObject result = new JSONObject();
+
+        HttpSession session = request.getSession();
+        String userInfo = (String) session.getAttribute("userInfo");
+        String[] user = userInfo.split("-");
+        int uId = Integer.parseInt(user[0]);
+
+        UserQuestionnaire userQuestionnaire = userQuestionnaireRepository.findByqId(qId);
+        if(userQuestionnaire == null || userQuestionnaire.getuId() != uId)
+            result.put("verify", false);
+        else {
+            result.put("verify", true);
+            UserQuestionnaire questionnaire =  userQuestionnaireRepository.findByqId(qId);
+            userQuestionnaireRepository.delete(questionnaire);
+        }
+        return result;
+    }
 }
