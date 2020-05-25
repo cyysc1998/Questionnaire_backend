@@ -23,7 +23,7 @@ public class ManageQuestionnaire {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "/api/submit", produces = "application/json;charset=UTF-8")
-    public Boolean submit(@RequestBody JSONObject answer, HttpServletRequest request) {
+    public int submit(@RequestBody JSONObject answer, HttpServletRequest request) {
         return manageInfo.submit(answer, request);
     }
 

@@ -1,13 +1,13 @@
 package com.example.questionnaire_backend.service.impl;
 
-import com.alibaba.fastjson.JSON;
+
 import com.example.questionnaire_backend.domain.*;
 import com.example.questionnaire_backend.repository.*;
 import com.example.questionnaire_backend.service.ManageInfo;
 import com.example.questionnaire_backend.service.impl.tools.Statistic;
+import com.example.questionnaire_backend.service.impl.tools.Authority;
 import net.minidev.json.JSONObject;
-import org.apache.tomcat.jni.Local;
-import org.springframework.jmx.export.naming.IdentityNamingStrategy;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.awt.*;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -95,7 +94,7 @@ public class ManageInfoImpl implements ManageInfo {
         return questionnaire;
     }
 
-    public Boolean submit(JSONObject answer, HttpServletRequest request) {
+    public int submit(JSONObject answer, HttpServletRequest request) {
         int uId = -1;
         HttpSession session = request.getSession();
         String userInfo = (String) session.getAttribute("userInfo");
@@ -105,6 +104,14 @@ public class ManageInfoImpl implements ManageInfo {
         }
 
         int qId = (Integer) answer.get("qId");
+
+        String ip = (String)(answer.get("ip"));
+
+        Authority authority = new Authority();
+
+        int authorityResult = authority.authorityJudge(qId, uId, ip);
+        if(authorityResult < 0)
+            return authorityResult;
 
         LinkedHashMap<String, ?> answers = (LinkedHashMap<String, ?>) answer.get("answer");
 
@@ -160,7 +167,10 @@ public class ManageInfoImpl implements ManageInfo {
                 answerTuple.setOrderId(orderId);
                 answerTuple.setAnswer(answerContent);
             }
+            answerTuple.setIp((String)(answer.get("ip")));
+            answerTuple.setTime(LocalDate.now());
             answerRepository.save(answerTuple);
+            answerTuple.setPosition((String)(answer.get("location")));
         }
 
         Questionnaire questionnaire = questionnaireRepository.findById(qId).get();
@@ -169,7 +179,7 @@ public class ManageInfoImpl implements ManageInfo {
         questionnaireRepository.save(questionnaire);
 
         System.out.println(answers);
-        return true;
+        return 1;
     }
 
     public Boolean modified(@RequestBody JSONObject info, HttpServletRequest request) {

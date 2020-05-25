@@ -104,34 +104,39 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
             return juedeSettingResult;
 
         int qId = insertQuestionnaire(metadata, setting);
-
-        for(int i=0; i<questionsList.size(); i++) {
-            int type = (Integer) questionsList.get(i).get("type");
-            int orderId = (Integer) questionsList.get(i).get("id");
-            int questionId = 0;
-            switch (type) {
-                case 0:
-                    questionId = parseSingleChoice(questionsList.get(i), logicInfo);
-                    break;
-                case 1:
-                    questionId = parseMultiChoice(questionsList.get(i));
-                    break;
-                case 2:
-                    questionId = parseIntegerCollect(questionsList.get(i));
-                    break;
-                case 3:
-                    questionId = parseFloatCollect(questionsList.get(i));
-                    break;
-                case 4:
-                    questionId = parseTextCollect(questionsList.get(i));
-                    break;
-                case 5:
-                    questionId = parseRateCollect(questionsList.get(i));
-                    break;
-                default:
-                    break;
+        int i = 0;
+        try {
+            for (i = 0; i < questionsList.size(); i++) {
+                int type = (Integer) questionsList.get(i).get("type");
+                int orderId = (Integer) questionsList.get(i).get("id");
+                int questionId = 0;
+                switch (type) {
+                    case 0:
+                        questionId = parseSingleChoice(questionsList.get(i), logicInfo);
+                        break;
+                    case 1:
+                        questionId = parseMultiChoice(questionsList.get(i));
+                        break;
+                    case 2:
+                        questionId = parseIntegerCollect(questionsList.get(i));
+                        break;
+                    case 3:
+                        questionId = parseFloatCollect(questionsList.get(i));
+                        break;
+                    case 4:
+                        questionId = parseTextCollect(questionsList.get(i));
+                        break;
+                    case 5:
+                        questionId = parseRateCollect(questionsList.get(i));
+                        break;
+                    default:
+                        break;
+                }
+                insertQuestionMap(type, questionId, orderId, qId);
             }
-            insertQuestionMap(type, questionId, orderId, qId);
+        }
+        catch (Exception e) {
+            return -100000-i;
         }
 
         insertUserQuestionnaire(uId, qId);

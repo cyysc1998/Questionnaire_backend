@@ -1,6 +1,7 @@
 package com.example.questionnaire_backend.domain;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Answer")
@@ -15,11 +16,44 @@ public class Answer {
     @Column(name = "q_Id")
     private int qId;
 
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
     @Column(name = "answer")
     private String answer;
 
     @Column(name = "order_Id")
     private int orderId;
+
+    @Column(name = "position")
+    private String position;
+
+    public LocalDate getTime() {
+        return time;
+    }
+
+    public void setTime(LocalDate time) {
+        this.time = time;
+    }
+
+    @Column(name = "ip")
+    private String ip;
+
+    @Column(name = "time")
+    private LocalDate time;
 
     public Answer() {
 
