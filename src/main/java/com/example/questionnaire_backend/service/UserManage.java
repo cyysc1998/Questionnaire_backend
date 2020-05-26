@@ -13,4 +13,5 @@ public interface UserManage {
     int registerNameCheck(String name);
     int registerEmailCheck(String email);
     Boolean loginCheck(HttpServletRequest request);
+    JSONObject getInfo(HttpServletRequest request);
 }

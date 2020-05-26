@@ -1,6 +1,7 @@
 package com.example.questionnaire_backend.domain;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "User")
@@ -17,6 +18,17 @@ public class User {
 
     @Column(name = "email")
     private String email;
+
+    public LocalDate getTime() {
+        return time;
+    }
+
+    public void setTime(LocalDate time) {
+        this.time = time;
+    }
+
+    @Column(name = "register_time")
+    private LocalDate time;
 
     public User() {
 

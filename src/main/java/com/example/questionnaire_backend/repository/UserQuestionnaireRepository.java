@@ -8,4 +8,5 @@ import java.util.List;
 public interface UserQuestionnaireRepository extends JpaRepository<UserQuestionnaire, Integer> {
     List<UserQuestionnaire> findByuId(int uId);
     UserQuestionnaire findByqId(int qId);
+    List<UserQuestionnaire> findAllByuId(int uId);
 }

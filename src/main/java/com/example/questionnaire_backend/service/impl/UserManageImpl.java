@@ -1,15 +1,20 @@
 package com.example.questionnaire_backend.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.example.questionnaire_backend.domain.User;
+import com.example.questionnaire_backend.domain.UserQuestionnaire;
+import com.example.questionnaire_backend.repository.UserQuestionnaireRepository;
 import com.example.questionnaire_backend.repository.UserRepository;
 import com.example.questionnaire_backend.service.UserManage;
 import net.minidev.json.JSONObject;
+import org.aspectj.weaver.patterns.HasThisTypePatternTriedToSneakInSomeGenericOrParameterizedTypePatternMatchingStuffAnywhereVisitor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -17,6 +22,8 @@ import java.util.List;
 public class UserManageImpl implements UserManage {
     @Resource
     private UserRepository userRepository;
+    @Resource
+    private UserQuestionnaireRepository userQuestionnaireRepository;
 
     private final int USERNAME_ERROR = -2;
     private final int PASSWORD_ERROR = -1;
@@ -63,6 +70,8 @@ public class UserManageImpl implements UserManage {
             newUser.setName(user.get("name").toString());
             newUser.setPassword(user.get("password").toString());
             newUser.setEmail(user.get("email").toString());
+            LocalDate curDate = LocalDate.now();
+            newUser.setTime(curDate);
             userRepository.save(newUser);
         }
         catch(Exception e) {
@@ -94,5 +103,31 @@ public class UserManageImpl implements UserManage {
             return false;
         else
             return true;
+    }
+
+    public JSONObject getInfo(HttpServletRequest request) {
+        int uId = -1;
+        HttpSession session = request.getSession();
+        String userInfo = (String) session.getAttribute("userInfo");
+        if(userInfo != null) {
+            String[] info = userInfo.split("-");
+            uId = Integer.parseInt(info[0]);
+        }
+
+        User user = userRepository.findById(uId).get();
+        String email = user.getEmail();
+        String name = user.getName();
+        LocalDate date = user.getTime();
+
+        List<UserQuestionnaire> userQuestionnaires = userQuestionnaireRepository.findAllByuId(uId);
+        int qnumbers = userQuestionnaires.size();
+
+        JSONObject info = new JSONObject();
+        info.put("email", email);
+        info.put("name", name);
+        info.put("qnumbers", qnumbers);
+        info.put("date", date);
+
+        return info;
     }
 }

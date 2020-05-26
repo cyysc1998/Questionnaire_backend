@@ -55,5 +55,12 @@ public class UserController {
     public Boolean isLogin(HttpServletRequest request) {
         return userManage.loginCheck(request);
     }
+
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "/api/getinfo")
+    public JSONObject getUserInfo(HttpServletRequest request) {
+        return userManage.getInfo(request);
+    }
 }
 
