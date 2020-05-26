@@ -11,10 +11,10 @@ public class Answer {
     private int id;
 
     @Column(name = "u_Id")
-    private int uID;
+    private int userId;
 
     @Column(name = "q_Id")
-    private int qId;
+    private int questionnaireId;
 
     public String getPosition() {
         return position;
@@ -67,20 +67,20 @@ public class Answer {
         this.id = id;
     }
 
-    public int getqId() {
-        return qId;
+    public int getqQuestionnaireId() {
+        return questionnaireId;
     }
 
-    public void setqId(int qId) {
-        this.qId = qId;
+    public void setqQuestionnaireId(int qId) {
+        this.questionnaireId = qId;
     }
 
-    public int getuID() {
-        return uID;
+    public int getuUId() {
+        return userId;
     }
 
-    public void setuID(int uID) {
-        this.uID = uID;
+    public void setuUId(int uID) {
+        this.userId = uID;
     }
 
     public String getAnswer() {

@@ -58,6 +58,8 @@ public class ManageInfoImpl implements ManageInfo {
     private ChoiceMapRepository choiceMapRepository;
     @Resource
     private ChoicesRepository choicesRepository;
+    @Resource
+    private Authority authority;
 
     @Override
     public JSONObject manage(HttpServletRequest request) {
@@ -107,8 +109,6 @@ public class ManageInfoImpl implements ManageInfo {
 
         String ip = (String)(answer.get("ip"));
 
-        Authority authority = new Authority();
-
         int authorityResult = authority.authorityJudge(qId, uId, ip);
         if(authorityResult < 0)
             return authorityResult;
@@ -137,8 +137,8 @@ public class ManageInfoImpl implements ManageInfo {
                     else
                 answerContent = answerContent + "-" + s;
             }
-                answerTuple.setuID(uId);
-                answerTuple.setqId(qId);
+                answerTuple.setuUId(uId);
+                answerTuple.setqQuestionnaireId(qId);
                 answerTuple.setOrderId(orderId);
                 answerTuple.setAnswer(answerContent);
             }
@@ -148,22 +148,22 @@ public class ManageInfoImpl implements ManageInfo {
                     answerContent = ((Double) answers.get(answerKey)).toString();
                 else
                     answerContent = ((Integer) answers.get(answerKey)).toString();
-                answerTuple.setuID(uId);
-                answerTuple.setqId(qId);
+                answerTuple.setuUId(uId);
+                answerTuple.setqQuestionnaireId(qId);
                 answerTuple.setOrderId(orderId);
                 answerTuple.setAnswer(answerContent);
             }
             else if(type == TEXT_COLLECTION_TYPE) {
                 String answerContent = (String) answers.get(answerKey);
-                answerTuple.setuID(uId);
-                answerTuple.setqId(qId);
+                answerTuple.setuUId(uId);
+                answerTuple.setqQuestionnaireId(qId);
                 answerTuple.setOrderId(orderId);
                 answerTuple.setAnswer(answerContent);
             }
             else if(type == SINGLE_CHOICE_TYPE || type == INTEGER_COLLECTION_TYPE){
                 String answerContent = ((Integer) answers.get(answerKey)).toString();
-                answerTuple.setuID(uId);
-                answerTuple.setqId(qId);
+                answerTuple.setuUId(uId);
+                answerTuple.setqQuestionnaireId(qId);
                 answerTuple.setOrderId(orderId);
                 answerTuple.setAnswer(answerContent);
             }
@@ -319,9 +319,30 @@ public class ManageInfoImpl implements ManageInfo {
                 answer.add(curAnswer);
             }
             result.put("answer", answer);
+
+            List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndOrderId(qId, 1);
+            ArrayList<JSONObject> location = new ArrayList<>();
+
+            for(int i = 0; i < answers.size(); i++) {
+                Answer curAnswer = answers.get(i);
+                String position = curAnswer.getPosition();
+                Boolean find = false;
+                for(int j = 0; j < location.size(); j ++) {
+                    if(((String)location.get(j).get("location")).compareTo(position) == 0) {
+                        location.get(j).put("qnumber", (Integer) location.get(j).get("qnumber") + 1);
+                        find = true;
+                    }
+                }
+                if(!find) {
+                    JSONObject newLocation = new JSONObject();
+                    newLocation.put("location", position);
+                    newLocation.put("qnumber", 1);
+                    location.add(newLocation);
+                }
+            }
+
+            result.put("location", location);
         }
-
-
 
         return result;
     }
@@ -344,12 +365,12 @@ public class ManageInfoImpl implements ManageInfo {
             choicesContent.add(choiceContent);
         }
 
-        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndOrderId(qId, key);
 
         for(int i = 0; i < answers.size(); i++) {
             Answer curAnswer = answers.get(i);
             int answer = Integer.parseInt(curAnswer.getAnswer());
-            int uId = curAnswer.getuID();
+            int uId = curAnswer.getuUId();
 
             String userName = getUserName(uId);
 
@@ -392,14 +413,14 @@ public class ManageInfoImpl implements ManageInfo {
             choicesContent.add(choiceContent);
         }
 
-        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndOrderId(qId, key);
 
         for(int i = 0; i < answers.size(); i++) {
             Answer curAnswer = answers.get(i);
             String[] splitAnswer = curAnswer.getAnswer().split("-");
             for(int j=0; j<splitAnswer.length; j++) {
                 int answer = Integer.parseInt(splitAnswer[j]);
-                int uId = curAnswer.getuID();
+                int uId = curAnswer.getuUId();
 
                 String userName = getUserName(uId);
 
@@ -430,13 +451,13 @@ public class ManageInfoImpl implements ManageInfo {
 
     public List<JSONObject> analysisCommonAnswer(int qId, int key) {
         List<JSONObject> answerList = new LinkedList<>();
-        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndOrderId(qId, key);
         for(int i=0; i<answers.size(); i++) {
             JSONObject answer = new JSONObject();
             Answer curAnswer = answers.get(i);
             answer.put("key", i+1);
             answer.put("answer", curAnswer.getAnswer());
-            int uId = curAnswer.getuID();
+            int uId = curAnswer.getuUId();
             String userName = getUserName(uId);
             answer.put("user", userName);
             answerList.add(answer);
@@ -446,13 +467,13 @@ public class ManageInfoImpl implements ManageInfo {
 
     public List<JSONObject> analysisRateAnswer(int qId, int key, int count) {
         List<JSONObject> answerList = new LinkedList<>();
-        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndOrderId(qId, key);
         for(int i=0; i<answers.size(); i++) {
             JSONObject answer = new JSONObject();
             Answer curAnswer = answers.get(i);
             answer.put("key", i+1);
             answer.put("answer", curAnswer.getAnswer() + "/" + count);
-            int uId = curAnswer.getuID();
+            int uId = curAnswer.getuUId();
             String userName = getUserName(uId);
             answer.put("user", userName);
             answerList.add(answer);
@@ -463,7 +484,7 @@ public class ManageInfoImpl implements ManageInfo {
 
     public void statistic(int qId, int key, JSONObject curAnswer) {
         ArrayList<Double> numberList = new ArrayList<>();
-        List<Answer> answers = answerRepository.findAllByqIdAndOrderId(qId, key);
+        List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndOrderId(qId, key);
         for(int j=0; j<answers.size(); j++) {
             numberList.add(Double.parseDouble(answers.get(j).getAnswer()));
         }
