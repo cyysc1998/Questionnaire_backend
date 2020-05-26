@@ -92,7 +92,7 @@ public class ManageInfoImpl implements ManageInfo {
             questions.add(question);
         }
         questionnaire.put("questions", questions);
-        System.out.println(questionnaire);
+
         return questionnaire;
     }
 
@@ -178,6 +178,7 @@ public class ManageInfoImpl implements ManageInfo {
         questionnaire.setAnswerNumber(curAnswerNumber + 1);
         questionnaireRepository.save(questionnaire);
 
+        System.out.print("Receive answer of questionnaire " + qId + ": ");
         System.out.println(answers);
         return 1;
     }
@@ -223,7 +224,6 @@ public class ManageInfoImpl implements ManageInfo {
             result.put("verify", false);
         else {
             result.put("verify", true);
-            System.out.println(qId);
             Questionnaire questionnaire = questionnaireRepository.findById(qId).get();
 
             JSONObject metadata = new JSONObject();

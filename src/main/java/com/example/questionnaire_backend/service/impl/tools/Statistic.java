@@ -52,7 +52,8 @@ public class Statistic {
             median = array.get(array.size() / 2);
         }
         else {
-            median = (array.get(array.size() / 2) + array.get(array.size() / 2 + 1)) / 2;
+            System.out.println(array.size());
+            median = (array.get((array.size()-1) / 2) + array.get(array.size() / 2)) / 2;
         }
         return median;
     }

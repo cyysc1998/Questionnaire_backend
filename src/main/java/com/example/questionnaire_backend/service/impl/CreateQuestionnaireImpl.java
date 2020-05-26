@@ -69,6 +69,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
     }
 
     public int create(JSONObject data, HttpServletRequest request) {
+        System.out.print("Parse questionnaire: ");
         System.out.println(data);
 
         HttpSession session = request.getSession();
@@ -108,7 +109,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         try {
             for (i = 0; i < questionsList.size(); i++) {
                 int type = (Integer) questionsList.get(i).get("type");
-                int orderId = (Integer) questionsList.get(i).get("id");
+                int orderId = i + 1;
                 int questionId = 0;
                 switch (type) {
                     case 0:
