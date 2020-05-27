@@ -62,5 +62,12 @@ public class UserController {
     public JSONObject getUserInfo(HttpServletRequest request) {
         return userManage.getInfo(request);
     }
+
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "/api/modifiedpasswd", produces = "application/json;charset=UTF-8")
+    public int modifiedPassword(@RequestBody JSONObject info, HttpServletRequest request) {
+        return userManage.modifiedPassword(request, info);
+    }
 }
 

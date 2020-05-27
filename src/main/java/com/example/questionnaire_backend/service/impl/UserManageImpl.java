@@ -130,4 +130,27 @@ public class UserManageImpl implements UserManage {
 
         return info;
     }
+
+    public int modifiedPassword(HttpServletRequest request, JSONObject info) {
+        int uId = -1;
+        HttpSession session = request.getSession();
+        String userInfo = (String) session.getAttribute("userInfo");
+        if(userInfo != null) {
+            String[] infos = userInfo.split("-");
+            uId = Integer.parseInt(infos[0]);
+        }
+
+        User user = userRepository.findById(uId).get();
+        String oldPassword = user.getPassword();
+        String oldPasswordVerify = (String) info.get("oldPassword");
+
+        if(oldPassword.compareTo(oldPasswordVerify) == 0) {
+            String newPassword = (String) info.get("password");
+            user.setPassword(newPassword);
+            userRepository.save(user);
+            return 1;
+        }
+        else
+            return 0;
+    }
 }
