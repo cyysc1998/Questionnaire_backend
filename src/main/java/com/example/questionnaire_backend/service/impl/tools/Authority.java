@@ -54,14 +54,14 @@ public class Authority {
         else {
             int maxTimes = questionnaire.getMaxTimes();
             if(uId == ANONYMOUS) {
-                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndIp(qId, ip);
+                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndIpAndOrderId(qId, ip, 1);
                 if(answers.size() >= maxTimes)
                     permit = false;
                 else
                     permit = true;
             }
             else {
-                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndUserId(qId, uId);
+                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndUserIdAndOrderId(qId, uId, 1);
                 if(answers.size() >= maxTimes)
                     permit = false;
                 else
@@ -82,14 +82,14 @@ public class Authority {
             int maxTimesPerDay = questionnaire.getMaxTimes();
             LocalDate curDay = LocalDate.now();
             if(uId == ANONYMOUS) {
-                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndIpAndTime(qId, ip, curDay);
+                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndIpAndTimeAndOrderId(qId, ip, curDay, 1);
                 if(answers.size() >= maxTimesPerDay)
                     permit = false;
                 else
                     permit = true;
             }
             else {
-                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndUserIdAndTime(qId, uId, curDay);
+                List<Answer> answers = answerRepository.findAllByQuestionnaireIdAndUserIdAndTimeAndOrderId(qId, uId, curDay, 1);
                 if(answers.size() >= maxTimesPerDay)
                     permit = false;
                 else

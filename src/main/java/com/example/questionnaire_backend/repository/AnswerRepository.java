@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface AnswerRepository extends JpaRepository<Answer, Integer> {
     List<Answer> findAllByQuestionnaireIdAndOrderId(int qId, int orderId);
-    List<Answer> findAllByQuestionnaireIdAndUserId(int qId, int uId);
-    List<Answer> findAllByQuestionnaireIdAndIp(int qId, String ip);
-    List<Answer> findAllByQuestionnaireIdAndUserIdAndTime(int qId, int uId, LocalDate time);
-    List<Answer> findAllByQuestionnaireIdAndIpAndTime(int qId, String ip, LocalDate time);
+    List<Answer> findAllByQuestionnaireIdAndUserIdAndOrderId(int qId, int uId, int orderId);
+    List<Answer> findAllByQuestionnaireIdAndIpAndOrderId(int qId, String ip, int orderId);
+    List<Answer> findAllByQuestionnaireIdAndUserIdAndTimeAndOrderId(int qId, int uId, LocalDate time, int orderId);
+    List<Answer> findAllByQuestionnaireIdAndIpAndTimeAndOrderId(int qId, String ip, LocalDate time, int orderId);
 }
