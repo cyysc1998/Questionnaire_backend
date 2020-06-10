@@ -113,7 +113,7 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
                 int questionId = 0;
                 switch (type) {
                     case 0:
-                        questionId = parseSingleChoice(questionsList.get(i), logicInfo);
+                        questionId = parseSingleChoice(questionsList.get(i), logicInfo, orderId);
                         break;
                     case 1:
                         questionId = parseMultiChoice(questionsList.get(i));
@@ -298,10 +298,9 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
         return qId;
     }
 
-    private int parseSingleChoice(LinkedHashMap<String, ?> singleCollectInfo, LinkedHashMap<String, ?> logicInfo) {
+    private int parseSingleChoice(LinkedHashMap<String, ?> singleCollectInfo, LinkedHashMap<String, ?> logicInfo, int orderId) {
         LinkedHashMap<String, ?> content = (LinkedHashMap<String, ?>) singleCollectInfo.get("q_content");
         ArrayList<String> choicesInfo = (ArrayList<String>) ((LinkedHashMap<String, ?>)content.get("choices")).get("names");
-        int orderedId = (Integer) singleCollectInfo.get("id");
 
 
         String title = (String) content.get("intro");
@@ -332,7 +331,8 @@ public class CreateQuestionnaireImpl implements CreateQuestionnaire {
                 String[] questionAndChoiceIndex = choiceInfo.split("-");
                 int questionId = Integer.parseInt(questionAndChoiceIndex[0]);
                 int choiceId = Integer.parseInt(questionAndChoiceIndex[1]);
-                if(questionId != orderedId || choiceId != i )
+
+                if(questionId != orderId || choiceId != i )
                     continue;
                 ArrayList<String> relatedQuestions = (ArrayList<String>) logicInfo.get(choiceInfo);
 
